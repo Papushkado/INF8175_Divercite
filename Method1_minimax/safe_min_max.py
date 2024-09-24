@@ -62,8 +62,8 @@ class MyPlayer(PlayerDivercite):
 
         for action in current_state.get_possible_light_actions():
             next_state = current_state.apply_action(action)
-            action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
-            if action_value > best_value:
+            action_value = minimax(next_state, 2, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
+            if action_value > best_value:                # Pronfondeur 3 c'est trop, c'est tropico
                 best_value = action_value
                 best_action = action
 
@@ -79,5 +79,17 @@ class MyPlayer(PlayerDivercite):
         Returns:
             float: Heuristic value of the game state.
         """
-        # Implement a heuristic function here
-        return state.scores[self.get_id()]  # Example heuristic based on current score 
+        players = state.players # Dedans il y a le player adverse et le mien
+        players_id = [p.get_id() for p in players]
+        player_id = self.get_id()
+        
+        player_score = state.scores[self.get_id()]
+        if players_id[0] == player_id:
+            opponent_score = state.scores[players_id[1]]
+        else : 
+            opponent_score = state.scores[players_id[0]]
+        
+        
+        return player_score - opponent_score  
+    # return state.scores[self.get_id()]   # Vraiment pas folle parce qu'on peut augmenter le score de l'adversaire
+

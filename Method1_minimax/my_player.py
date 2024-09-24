@@ -62,10 +62,49 @@ class MyPlayer(PlayerDivercite):
 
         for action in current_state.get_possible_light_actions():
             next_state = current_state.apply_action(action)
+            
+            '''
+            Version brute du minimax mais trop longue
+            
             action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
             if action_value > best_value:
                 best_value = action_value
                 best_action = action
+            '''
+            # print(current_state.players_pieces_left)
+            players = current_state.players # Dedans il y a le player adverse et le mien
+            players_id = [p.get_id() for p in players]
+            
+            dic_player_pieces = current_state.players_pieces_left
+            dic_pieces_1 = dic_player_pieces[players_id[0]]
+            dic_pieces_2 = dic_player_pieces[players_id[1]]
+            
+            pieces = ['RC', 'RR', 'GC', 'GR', 'BC', 'BR', 'YC', 'YR']
+            nb_pieces_1, nb_pieces_2 = 0, 0
+            
+            for p in pieces : 
+                nb_pieces_1 += dic_pieces_1[p]
+                nb_pieces_2 += dic_pieces_2[p]
+            
+            if nb_pieces_1 + nb_pieces_2 >= 30:
+                
+                action_value = minimax(next_state, 2, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
+                if action_value > best_value:
+                    best_value = action_value
+                    best_action = action
+            
+            elif nb_pieces_1 + nb_pieces_2 >= 20:
+                
+                action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
+                if action_value > best_value:
+                    best_value = action_value
+                    best_action = action
+                    
+            elif nb_pieces_1 + nb_pieces_2 >= 13:
+                action_value = minimax(next_state, 4, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
+                if action_value > best_value:
+                    best_value = action_value
+                    best_action = action
 
         return best_action
 
@@ -85,9 +124,9 @@ class MyPlayer(PlayerDivercite):
         
         player_score = state.scores[self.get_id()]
         if players_id[0] == player_id:
-            opponent_score = state.score[players_id[1]]
+            opponent_score = state.scores[players_id[1]]
         else : 
-            opponent_score == state.score[players_id[0]]
+            opponent_score = state.scores[players_id[0]]
         
         
         return player_score - opponent_score  
