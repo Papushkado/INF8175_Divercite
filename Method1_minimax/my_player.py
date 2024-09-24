@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import random
 from seahorse.game.action import Action
 from seahorse.utils.serializer import Serializable
 from player_divercite import PlayerDivercite
@@ -61,54 +62,58 @@ class MyPlayer(PlayerDivercite):
         best_value = float('-inf')
         
         # Todo : rajouter que la première action soit déterminer à l'avance
+        
+        if current_state.get_step() < 2: 
+            possible_actions = current_state.get_possible_light_actions()
 
-        for action in current_state.get_possible_light_actions():
-            next_state = current_state.apply_action(action)
-            
-            '''
+            return random.choice(list(possible_actions))
+        else : 
+            for action in current_state.get_possible_light_actions():
+                next_state = current_state.apply_action(action)
+                '''
             Version brute du minimax mais trop longue
             
             action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
             if action_value > best_value:
                 best_value = action_value
                 best_action = action
-            '''
-            # print(current_state.players_pieces_left)
-            players = current_state.players # Dedans il y a le player adverse et le mien
-            players_id = [p.get_id() for p in players]
+                '''
+                # print(current_state.players_pieces_left)
+                players = current_state.players # Dedans il y a le player adverse et le mien
+                players_id = [p.get_id() for p in players]
             
-            dic_player_pieces = current_state.players_pieces_left
-            dic_pieces_1 = dic_player_pieces[players_id[0]]
-            dic_pieces_2 = dic_player_pieces[players_id[1]]
+                dic_player_pieces = current_state.players_pieces_left
+                dic_pieces_1 = dic_player_pieces[players_id[0]]
+                dic_pieces_2 = dic_player_pieces[players_id[1]]
             
-            pieces = ['RC', 'RR', 'GC', 'GR', 'BC', 'BR', 'YC', 'YR']
-            nb_pieces_1, nb_pieces_2 = 0, 0
+                pieces = ['RC', 'RR', 'GC', 'GR', 'BC', 'BR', 'YC', 'YR']
+                nb_pieces_1, nb_pieces_2 = 0, 0
             
-            for p in pieces : 
-                nb_pieces_1 += dic_pieces_1[p]
-                nb_pieces_2 += dic_pieces_2[p]
+                for p in pieces : 
+                    nb_pieces_1 += dic_pieces_1[p]
+                    nb_pieces_2 += dic_pieces_2[p]
             
-            if nb_pieces_1 + nb_pieces_2 >= 20:
+                if nb_pieces_1 + nb_pieces_2 >= 20:
                 
-                action_value = minimax(next_state, 2, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
-                if action_value > best_value:
-                    best_value = action_value
-                    best_action = action
+                    action_value = minimax(next_state, 2, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
+                    if action_value > best_value:
+                        best_value = action_value
+                        best_action = action
             
-            elif nb_pieces_1 + nb_pieces_2 >= 15:
+                elif nb_pieces_1 + nb_pieces_2 >= 15:
                 
-                action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
-                if action_value > best_value:
-                    best_value = action_value
-                    best_action = action
+                    action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
+                    if action_value > best_value:
+                        best_value = action_value
+                        best_action = action
                     
-            else :
-                action_value = minimax(next_state, 4, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
-                if action_value > best_value:
-                    best_value = action_value
-                    best_action = action
+                else :
+                    action_value = minimax(next_state, 4, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
+                    if action_value > best_value:
+                        best_value = action_value
+                        best_action = action
 
-        return best_action
+            return best_action
 
     def evaluate_state(self, state: GameState) -> float:
         """
