@@ -59,6 +59,8 @@ class MyPlayer(PlayerDivercite):
 
         best_action = None
         best_value = float('-inf')
+        
+        # Todo : rajouter que la première action soit déterminer à l'avance
 
         for action in current_state.get_possible_light_actions():
             next_state = current_state.apply_action(action)
@@ -86,21 +88,21 @@ class MyPlayer(PlayerDivercite):
                 nb_pieces_1 += dic_pieces_1[p]
                 nb_pieces_2 += dic_pieces_2[p]
             
-            if nb_pieces_1 + nb_pieces_2 >= 30:
+            if nb_pieces_1 + nb_pieces_2 >= 20:
                 
                 action_value = minimax(next_state, 2, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
                 if action_value > best_value:
                     best_value = action_value
                     best_action = action
             
-            elif nb_pieces_1 + nb_pieces_2 >= 20:
+            elif nb_pieces_1 + nb_pieces_2 >= 15:
                 
                 action_value = minimax(next_state, 3, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
                 if action_value > best_value:
                     best_value = action_value
                     best_action = action
                     
-            elif nb_pieces_1 + nb_pieces_2 >= 13:
+            else :
                 action_value = minimax(next_state, 4, True)  ################### Ici pour changer la profondeure et mettre à True car on veut maximiser
                 if action_value > best_value:
                     best_value = action_value
