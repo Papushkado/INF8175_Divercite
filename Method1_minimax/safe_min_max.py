@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import random
 from seahorse.game.action import Action
 from seahorse.utils.serializer import Serializable
 from player_divercite import PlayerDivercite
@@ -61,11 +62,15 @@ class MyPlayer(PlayerDivercite):
                         best_action = action
                 return min_eval, best_action 
 
-        best_action = None
-        best_value = float('-inf')
-        _ , best_action = minimax(current_state, 3, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
+        if current_state.get_step() < 2:
+            possible_actions = current_state.get_possible_light_actions()
+            return random.choice(list(possible_actions))
+        else : 
+            best_action = None
+            # best_value = float('-inf')
+            _ , best_action = minimax(current_state, 3, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
 
-        return best_action
+            return best_action
 
     def evaluate_state(self, state: GameState) -> float:
         """

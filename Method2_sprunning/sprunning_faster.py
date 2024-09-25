@@ -78,7 +78,7 @@ class MyPlayer(PlayerDivercite):
 
             # Modifier la profondeur en fonction du nombre de pièces restantes
             if nb_pieces_1 + nb_pieces_2 >= 35:
-                depth = 4
+                depth = 3
             elif nb_pieces_1 + nb_pieces_2 >= 25:
                 depth = 4
             else:
