@@ -40,32 +40,30 @@ class MyPlayer(PlayerDivercite):
 
         def minimax(state: GameState, depth: int, maximizing_player: bool) -> float:
             if depth == 0 or state.is_done():
-                return self.evaluate_state(state)
+                return self.evaluate_state(state), None
 
             if maximizing_player:
                 max_eval = float('-inf')
                 for action in state.get_possible_light_actions():
                     next_state = state.apply_action(action)
-                    eval = minimax(next_state, depth - 1, False)
-                    max_eval = max(max_eval, eval)
-                return max_eval
+                    eval, _ = minimax(next_state, depth - 1, False)
+                    if eval > max_eval : 
+                        max_eval = eval
+                        best_action = action
+                return max_eval, best_action
             else:
                 min_eval = float('inf')
                 for action in state.get_possible_light_actions():
                     next_state = state.apply_action(action)
-                    eval = minimax(next_state, depth - 1, True)
-                    min_eval = min(min_eval, eval)
-                return min_eval
+                    eval, _  = minimax(next_state, depth - 1, True)
+                    if eval < min_eval:
+                        min_eval = eval
+                        best_action = action
+                return min_eval, best_action 
 
         best_action = None
         best_value = float('-inf')
-
-        for action in current_state.get_possible_light_actions():
-            next_state = current_state.apply_action(action)
-            action_value = minimax(next_state, 2, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
-            if action_value > best_value:                # Pronfondeur 3 c'est trop, c'est tropico
-                best_value = action_value
-                best_action = action
+        _ , best_action = minimax(current_state, 3, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
 
         return best_action
 

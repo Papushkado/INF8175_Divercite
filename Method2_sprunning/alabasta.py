@@ -18,7 +18,7 @@ class MyPlayer(PlayerDivercite):
         """
         Use the minimax algorithm with alpha-beta pruning to choose the best action.
         """
-        ### Cette version est Water Seven
+
         def alpha_beta_minimax(state: GameState, depth: int, alpha: float, beta: float, maximizing_player: bool) -> float:
             if depth == 0 or state.is_done():
                 return self.evaluate_state(state), None
@@ -77,14 +77,14 @@ class MyPlayer(PlayerDivercite):
             nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
 
             # Modifier la profondeur en fonction du nombre de pièces restantes
-            if nb_pieces_1 + nb_pieces_2 >= 35:
-                depth = 4
-            elif nb_pieces_1 + nb_pieces_2 >= 25:
+            if nb_pieces_1 + nb_pieces_2 >= 28:
+                depth = 3
+            elif nb_pieces_1 + nb_pieces_2 >= 20:
                 depth = 4
             else:
-                depth = 6
+                depth = 7
 
-            best_value, best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
+            _ , best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
             return best_action
 
     def evaluate_state(self, state: GameState) -> float:

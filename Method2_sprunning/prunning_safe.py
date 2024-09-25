@@ -97,10 +97,10 @@ class MyPlayer(PlayerDivercite):
             nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
 
             # Modifier la profondeur en fonction du nombre de pièces restantes
-            if nb_pieces_1 + nb_pieces_2 >= 35:
-                depth = 3
-            elif nb_pieces_1 + nb_pieces_2 >= 25:
+            if nb_pieces_1 + nb_pieces_2 >= 26:
                 depth = 4
+            elif nb_pieces_1 + nb_pieces_2 >= 18:
+                depth = 5
             else:
                 depth = 6
 
