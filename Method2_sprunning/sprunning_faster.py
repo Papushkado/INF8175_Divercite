@@ -1,10 +1,7 @@
-from __future__ import annotations
 import random
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 from player_divercite import PlayerDivercite
-from functools import lru_cache  # Pour la memoization
-
 
 class MyPlayer(PlayerDivercite):
     """
@@ -15,30 +12,24 @@ class MyPlayer(PlayerDivercite):
     """
 
     def __init__(self, piece_type: str, name: str = "AlphaBetaPlayer"):
-        """
-        Initialize the PlayerDivercite instance.
-
-        Args:
-            piece_type (str): Type of the player's game piece
-            name (str, optional): Name of the player (default is "AlphaBetaPlayer")
-        """
         super().__init__(piece_type, name)
-    
-    @lru_cache(maxsize=None)
+
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
-        Use the minimax algorithm with alpha-beta pruning to choose the best action, with optimizations for speed.
+        Use the minimax algorithm with alpha-beta pruning to choose the best action.
         """
+
         def alpha_beta_minimax(state: GameState, depth: int, alpha: float, beta: float, maximizing_player: bool) -> float:
             if depth == 0 or state.is_done():
                 return self.evaluate_state(state)
-            
+
             if maximizing_player:
                 max_eval = float('-inf')
                 actions = state.get_possible_light_actions()
 
-                # Trier les actions pour explorer les plus prometteuses d'abord
-                actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)), reverse=True)
+                # Ne trie que si le nombre d'actions est assez grand
+                if len(actions) > 5:
+                    actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)), reverse=True)
 
                 for action in actions:
                     next_state = state.apply_action(action)
@@ -52,8 +43,8 @@ class MyPlayer(PlayerDivercite):
                 min_eval = float('inf')
                 actions = state.get_possible_light_actions()
 
-                # Trier les actions pour explorer les plus prometteuses d'abord
-                actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)))
+                if len(actions) > 5:
+                    actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)))
 
                 for action in actions:
                     next_state = state.apply_action(action)
@@ -75,8 +66,8 @@ class MyPlayer(PlayerDivercite):
         else:
             actions = current_state.get_possible_light_actions()
 
-            # Trier les actions pour explorer les plus prometteuses d'abord
-            actions = sorted(actions, key=lambda a: self.evaluate_state(current_state.apply_action(a)), reverse=True)
+            if len(actions) > 5:
+                actions = sorted(actions, key=lambda a: self.evaluate_state(current_state.apply_action(a)), reverse=True)
 
             for action in actions:
                 next_state = current_state.apply_action(action)
@@ -91,9 +82,9 @@ class MyPlayer(PlayerDivercite):
                 nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
 
                 # Modifier la profondeur en fonction du nombre de pièces restantes
-                if nb_pieces_1 + nb_pieces_2 >= 20:
+                if nb_pieces_1 + nb_pieces_2 >= 30:
                     depth = 3
-                elif nb_pieces_1 + nb_pieces_2 >= 15:
+                elif nb_pieces_1 + nb_pieces_2 >= 20:
                     depth = 4
                 else:
                     depth = 5
@@ -109,14 +100,8 @@ class MyPlayer(PlayerDivercite):
     def evaluate_state(self, state: GameState) -> float:
         """
         Evaluate the game state and return a heuristic value.
-
-        Args:
-            state (GameState): The current game state.
-
-        Returns:
-            float: Heuristic value of the game state.
         """
-        players = state.players  # Get both players
+        players = state.players
         players_id = [p.get_id() for p in players]
         player_id = self.get_id()
 
@@ -124,4 +109,3 @@ class MyPlayer(PlayerDivercite):
         opponent_score = state.scores[players_id[0]] if players_id[0] != player_id else state.scores[players_id[1]]
 
         return player_score - opponent_score
-    # return state.scores[self.get_id()]   # Vraiment pas folle parce qu'on peut augmenter le score de l'adversaire
