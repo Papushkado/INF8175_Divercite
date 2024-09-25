@@ -18,7 +18,7 @@ class MyPlayer(PlayerDivercite):
         """
         Use the minimax algorithm with alpha-beta pruning to choose the best action.
         """
-
+        ### Cette version est Water Seven
         def alpha_beta_minimax(state: GameState, depth: int, alpha: float, beta: float, maximizing_player: bool) -> float:
             if depth == 0 or state.is_done():
                 return self.evaluate_state(state), None
