@@ -21,10 +21,11 @@ class MyPlayer(PlayerDivercite):
 
         def alpha_beta_minimax(state: GameState, depth: int, alpha: float, beta: float, maximizing_player: bool) -> float:
             if depth == 0 or state.is_done():
-                return self.evaluate_state(state)
+                return self.evaluate_state(state), None
 
             if maximizing_player:
                 max_eval = float('-inf')
+                best_action = None
                 actions = state.get_possible_light_actions()
 
                 # Ne trie que si le nombre d'actions est assez grand
@@ -33,14 +34,17 @@ class MyPlayer(PlayerDivercite):
 
                 for action in actions:
                     next_state = state.apply_action(action)
-                    eval = alpha_beta_minimax(next_state, depth - 1, alpha, beta, False)
-                    max_eval = max(max_eval, eval)
+                    eval, _ = alpha_beta_minimax(next_state, depth - 1, alpha, beta, False)
+                    if eval > max_eval:
+                        max_eval = eval
+                        best_action = action
                     alpha = max(alpha, eval)
                     if beta <= alpha:
                         break  # Coupure
-                return max_eval
+                return max_eval, best_action  # Return value and best action
             else:
                 min_eval = float('inf')
+                best_action = None
                 actions = state.get_possible_light_actions()
 
                 if len(actions) > 5:
@@ -48,15 +52,14 @@ class MyPlayer(PlayerDivercite):
 
                 for action in actions:
                     next_state = state.apply_action(action)
-                    eval = alpha_beta_minimax(next_state, depth - 1, alpha, beta, True)
-                    min_eval = min(min_eval, eval)
+                    eval, _ = alpha_beta_minimax(next_state, depth - 1, alpha, beta, True)
+                    if eval < min_eval:
+                        min_eval = eval
+                        best_action = action
                     beta = min(beta, eval)
                     if beta <= alpha:
                         break  # Coupure
-                return min_eval
-
-        best_action = None
-        best_value = float('-inf')
+                return min_eval, best_action  # Return value and best action
 
         # Pré-choisir une action si on joue en premier
         if current_state.get_step() < 2:
@@ -64,38 +67,25 @@ class MyPlayer(PlayerDivercite):
             return random.choice(list(possible_actions))
 
         else:
-            actions = current_state.get_possible_light_actions()
+        # Ajustement de la profondeur en fonction du nombre de pièces restantes
+            players = current_state.players
+            players_id = [p.get_id() for p in players]
+            dic_player_pieces = current_state.players_pieces_left
+            dic_pieces_1 = dic_player_pieces[players_id[0]]
+            dic_pieces_2 = dic_player_pieces[players_id[1]]
+            pieces = ['RC', 'RR', 'GC', 'GR', 'BC', 'BR', 'YC', 'YR']
+            nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
 
-            if len(actions) > 5:
-                actions = sorted(actions, key=lambda a: self.evaluate_state(current_state.apply_action(a)), reverse=True)
+            # Modifier la profondeur en fonction du nombre de pièces restantes
+            if nb_pieces_1 + nb_pieces_2 >= 35:
+                depth = 4
+            elif nb_pieces_1 + nb_pieces_2 >= 25:
+                depth = 5
+            else:
+                depth = 6
 
-            for action in actions:
-                next_state = current_state.apply_action(action)
-
-                # Ajustement de la profondeur en fonction du nombre de pièces restantes
-                players = current_state.players
-                players_id = [p.get_id() for p in players]
-                dic_player_pieces = current_state.players_pieces_left
-                dic_pieces_1 = dic_player_pieces[players_id[0]]
-                dic_pieces_2 = dic_player_pieces[players_id[1]]
-                pieces = ['RC', 'RR', 'GC', 'GR', 'BC', 'BR', 'YC', 'YR']
-                nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
-
-                # Modifier la profondeur en fonction du nombre de pièces restantes
-                if nb_pieces_1 + nb_pieces_2 >= 30:
-                    depth = 3
-                elif nb_pieces_1 + nb_pieces_2 >= 20:
-                    depth = 4
-                else:
-                    depth = 5
-
-                action_value = alpha_beta_minimax(next_state, depth, float('-inf'), float('inf'), True)
-
-                if action_value > best_value:
-                    best_value = action_value
-                    best_action = action
-
-        return best_action
+            best_value, best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
+            return best_action
 
     def evaluate_state(self, state: GameState) -> float:
         """
