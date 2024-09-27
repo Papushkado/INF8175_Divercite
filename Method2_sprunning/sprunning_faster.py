@@ -77,14 +77,22 @@ class MyPlayer(PlayerDivercite):
             nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
 
             # Modifier la profondeur en fonction du nombre de pièces restantes
+            
+            # Fonctionne rapidement 
+            '''
             if nb_pieces_1 + nb_pieces_2 >= 35:
                 depth = 3
-            elif nb_pieces_1 + nb_pieces_2 >= 25:
+            elif nb_pieces_1 + nb_pieces_2 >= 12:
                 depth = 4
             else:
                 depth = 6
-
-            best_value, best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
+            '''
+            if nb_pieces_1 + nb_pieces_2 >= 12:
+                depth = 4
+            else:
+                depth = 6
+            
+            _, best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
             return best_action
 
     def evaluate_state(self, state: GameState) -> float:

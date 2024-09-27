@@ -66,8 +66,27 @@ class MyPlayer(PlayerDivercite):
             possible_actions = current_state.get_possible_light_actions()
             return random.choice(list(possible_actions))
         else : 
+            # Ajustement de la profondeur en fonction du nombre de pièces restantes
+            players = current_state.players
+            players_id = [p.get_id() for p in players]
+            dic_player_pieces = current_state.players_pieces_left
+            dic_pieces_1 = dic_player_pieces[players_id[0]]
+            dic_pieces_2 = dic_player_pieces[players_id[1]]
+            pieces = ['RC', 'RR', 'GC', 'GR', 'BC', 'BR', 'YC', 'YR']
+            nb_pieces_1, nb_pieces_2 = sum(dic_pieces_1[p] for p in pieces), sum(dic_pieces_2[p] for p in pieces)
+
+            # Modifier la profondeur en fonction du nombre de pièces restantes
+            '''
+            if nb_pieces_1 + nb_pieces_2 >= 22:
+                depth = 3
+            elif nb_pieces_1 + nb_pieces_2 >= 12:
+                depth = 4
+            else:
+                depth = 5
             best_action = None
             # best_value = float('-inf')
+            '''
+            
             _ , best_action = minimax(current_state, 3, True)  ################### Ici pour changer la profondeur et mettre à True car on veut maximiser
 
             return best_action
