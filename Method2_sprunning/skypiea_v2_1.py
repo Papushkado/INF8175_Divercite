@@ -120,4 +120,4 @@ class MyPlayer(PlayerDivercite):
         nb_cite, nb_ressource = sum(dic_pieces_1[c] for c in cite), sum(dic_pieces_1[r] for r in ressource)
         
 
-        return player_score - opponent_score + (1 - 2 * state.step/40) * nb_cite + (1 + 4 * state.step/40) * nb_ressource
+        return player_score - opponent_score + (1 - 4 * state.step/40) * nb_cite + (1 + 4 * state.step/40) * nb_ressource
