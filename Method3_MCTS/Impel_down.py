@@ -81,8 +81,9 @@ class MyPlayer(PlayerDivercite):
             actions = state.get_possible_light_actions()
             actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)), reverse=True)[:max_root_children]
             treePaine.children = {action: MCTS.TreeNode(state.apply_action(action), parent=treePaine) for action in actions}
+        wasted_simulations = 0
         for _ in range(simulation):
-            print(f"\rMCTS Iteration: {_ + 1}/{simulation}", end='', flush=True)
+            print(f"\rMCTS Iteration: {_ + 1}/{simulation}, wasted simulations: {wasted_simulations}", end='', flush=True)
             if _ == simulation - 1:
                 print("\n")
             #Select 
@@ -91,6 +92,8 @@ class MyPlayer(PlayerDivercite):
             # 2. Expansion
             if not node.state.is_done() and not node.is_fully_expanded():
                 node = node.expand()
+            else :
+                wasted_simulations += 1
 
             outcome = 0
             if simple:
