@@ -77,7 +77,7 @@ class MyPlayer(PlayerDivercite):
 
     def mcts_taylorsVersion(self, state : GameState, simple, max_root_children = -1, simulation = 1000):
         treePaine = MCTS.TreeNode(state, max_root_children)
-        if treePaine.parent == None:
+        if treePaine.parent == None and max_root_children > 0:
             actions = state.get_possible_light_actions()
             actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)), reverse=True)[:max_root_children]
             treePaine.children = {action: MCTS.TreeNode(state.apply_action(action), parent=treePaine) for action in actions}
