@@ -75,11 +75,11 @@ class MyPlayer(PlayerDivercite):
 
         return self.evaluate_state(current_state)
 
-    def mcts_taylorsVersion(self, state : GameState, simple, simulation = 1000):
-        treePaine = MCTS.TreeNode(state)
+    def mcts_taylorsVersion(self, state : GameState, simple, max_root_children = -1, simulation = 1000):
+        treePaine = MCTS.TreeNode(state, max_root_children)
         if treePaine.parent == None:
             actions = state.get_possible_light_actions()
-            actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)), reverse=True)[:5]
+            actions = sorted(actions, key=lambda a: self.evaluate_state(state.apply_action(a)), reverse=True)[:max_root_children]
             treePaine.children = {action: MCTS.TreeNode(state.apply_action(action), parent=treePaine) for action in actions}
         for _ in range(simulation):
             print(f"\rMCTS Iteration: {_ + 1}/{simulation}", end='', flush=True)
@@ -169,7 +169,7 @@ class MyPlayer(PlayerDivercite):
             return self.greedy(current_state)
         # Utiliser MCTS pour les 10 premiers coups
         if current_state.get_step() < 10:
-            return self.mcts_taylorsVersion(current_state, False, 5000)
+            return self.mcts_taylorsVersion(current_state, True, 10, 100000)
 
         # Pour les coups suivants, utiliser alpha-beta
         else:

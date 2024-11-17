@@ -3,17 +3,18 @@ import math
 from seahorse.game.game_state import GameState
 
 class TreeNode:
-    def __init__(self, state : GameState, parent=None):
+    def __init__(self, state : GameState, max_root_children = -1, parent=None):
         self.state = state
         self.parent = parent
+        self.max_root_children = max_root_children 
         self.children = {}
         self.visits = 0
         self.value = 0.0
 
     def is_fully_expanded(self):
         """ Check if all possible actions have been expanded. """
-        if (self.parent == None) :
-            return len(self.children) == 5
+        if (self.parent == None and self.max_root_children > -1) :
+            return len(self.children) == self.max_root_children
         else: 
             return len(self.children) == len(self.state.get_possible_light_actions())
 
