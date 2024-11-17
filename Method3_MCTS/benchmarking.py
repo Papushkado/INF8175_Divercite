@@ -51,8 +51,7 @@ def make_record(player_1, player_2):
 
 if __name__ == '__main__':
     os.makedirs("benchmark", exist_ok=True)
-    #wins = benchmark("random_player_divercite.py", "skypiea_v2_1.py", 5)
-
-    wins = benchmark("skypiea_v2.py", "skypiea_v2_1.py", 15)
+    #wins = benchmark("random_player_divercite.py", "random_player_divercite.py", 5)
+    wins = benchmark("skypiea_v2_1.py", "Impel_down.py", 6)
     with open("wins.txt", "w") as file:
         print(wins, file=file) 

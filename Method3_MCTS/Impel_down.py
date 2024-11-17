@@ -42,7 +42,8 @@ class MyPlayer(PlayerDivercite):
     def simpleSimulation(self, node):
         current_state = node.state
         while not current_state.is_done():
-            action = random.choice(list(current_state.get_possible_light_actions()))
+            possible_actions = list(current_state.get_possible_light_actions())
+            action = random.choice(possible_actions)
             current_state = current_state.apply_action(action)
         return self.evaluate_state(current_state)
 
@@ -50,7 +51,7 @@ class MyPlayer(PlayerDivercite):
         current_state = node.state
         while not current_state.is_done():
             possible_actions = list(current_state.get_possible_light_actions())
-    
+        
             # Evaluate each possible next state
             action_scores = []
             for action in possible_actions:
@@ -77,7 +78,9 @@ class MyPlayer(PlayerDivercite):
     def mcts_taylorsVersion(self, state : GameState, simple, simulation = 1000):
         treePaine = MCTS.TreeNode(state)
         for _ in range(simulation):
-            print(_)
+            print(f"\rMCTS Iteration: {_ + 1}/{simulation}", end='', flush=True)
+            if _ == simulation - 1:
+                print("\n")
             #Select 
             node = treePaine.select()
 
@@ -98,7 +101,6 @@ class MyPlayer(PlayerDivercite):
 
         # Choose the action leading to the best child
         best_action = max(treePaine.children.items(), key=lambda item: item[1].visits)[0]
-        print(treePaine.children)
         return best_action
     
     def alpha_beta_minimax(self, state: GameState, depth: int, alpha: float, beta: float, maximizing_player: bool) -> float:
@@ -159,11 +161,11 @@ class MyPlayer(PlayerDivercite):
         Compute action using MCTS for the first 10 moves, then alpha-beta pruning.
         """
 
-        if current_state.get_step() < 3:
+        if current_state.get_step() < 2:
             return self.greedy(current_state)
         # Utiliser MCTS pour les 10 premiers coups
         if current_state.get_step() < 10:
-            return self.mcts_taylorsVersion(current_state, False, 1000000)
+            return self.mcts_taylorsVersion(current_state, True, 20000)
 
         # Pour les coups suivants, utiliser alpha-beta
         else:
@@ -202,3 +204,4 @@ class MyPlayer(PlayerDivercite):
         nb_cite, nb_ressource = sum(dic_pieces_1[c] for c in cite), sum(dic_pieces_1[r] for r in ressource)
         
         return player_score - opponent_score + (1 - 4 * state.step / 40) * nb_cite + (1 + 4 * state.step / 40) * nb_ressource
+            
