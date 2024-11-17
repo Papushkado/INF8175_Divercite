@@ -1,8 +1,9 @@
 import random 
 import math
+from seahorse.game.game_state import GameState
 
 class TreeNode:
-    def __init__(self, state, parent=None):
+    def __init__(self, state : GameState, parent=None):
         self.state = state
         self.parent = parent
         self.children = {}
@@ -11,7 +12,10 @@ class TreeNode:
 
     def is_fully_expanded(self):
         """ Check if all possible actions have been expanded. """
-        return len(self.children) == len(self.state.get_possible_light_actions())
+        if (self.parent == None) :
+            return len(self.children) == 5
+        else: 
+            return len(self.children) == len(self.state.get_possible_light_actions())
 
     def uct_value(self, exploration_constant=math.sqrt(2)):
         """ Calculate the UCT value for this node. """
