@@ -169,7 +169,7 @@ class MyPlayer(PlayerDivercite):
             return self.greedy(current_state)
         # Utiliser MCTS pour les 10 premiers coups
         if current_state.get_step() < 10:
-            return self.mcts_taylorsVersion(current_state, True, 10, 10000)
+            return self.mcts_taylorsVersion(current_state, True, 10, 20000)
 
         # Pour les coups suivants, utiliser alpha-beta
         else:

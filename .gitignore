@@ -839,3 +839,14 @@ Method3_MCTS/__pycache__/master_divercite.cpython-312.pyc
 Method3_MCTS/__pycache__/MCTS.cpython-312.pyc
 Method3_MCTS/__pycache__/player_divercite.cpython-312.pyc
 Method3_MCTS/__pycache__/skypiea_v2.cpython-312.pyc
+Method3_MCTS/__pycache__/board_divercite.cpython-39.pyc
+Method3_MCTS/__pycache__/game_state_divercite.cpython-39.pyc
+Method3_MCTS/__pycache__/greedy_player_divercite.cpython-39.pyc
+Method3_MCTS/__pycache__/Impel_down.cpython-39.pyc
+Method3_MCTS/__pycache__/master_divercite.cpython-39.pyc
+Method3_MCTS/__pycache__/MCTS.cpython-39.pyc
+Method3_MCTS/__pycache__/player_divercite.cpython-39.pyc
+Method3_MCTS/__pycache__/random_player_divercite.cpython-39.pyc
+Method3_MCTS/__pycache__/skypiea_v2_1.cpython-39.pyc
+Method3_MCTS/__pycache__/skypiea_v2.cpython-39.pyc
+wins.txt
