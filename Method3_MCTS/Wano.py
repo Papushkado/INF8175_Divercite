@@ -22,24 +22,39 @@ class MyPlayer(PlayerDivercite):
         """
         Utilise l'itération progressive pour déterminer le meilleur coup avec une limite de temps.
         """
+        start_time = time.time()
         step = state.get_step()
 
-        # Déterminer la profondeur initiale en fonction du nombre de coups joués
+        # Déterminer la profondeur initiale
         if step < 7:
-            depth = 3  # Profondeur fixe pour les 7 premiers coups
+            depth = 3
         elif step < 12:
-            depth = 4  # Profondeur initiale pour les coups suivants
+            depth = 4
         else:
             depth = 6
-        
+
+        max_depth = 15  # Limite maximale de profondeur pour éviter les calculs excessifs
         best_action = None
-        _, best_action = self.alpha_beta_minimax(
-                state, depth, float('-inf'), float('inf'), True)
-        start_time = time.time()
-        while time.time() - start_time < max_time and step >= 15:
-            depth += 1
-            _, best_action = self.alpha_beta_minimax(
-                state, depth, float('-inf'), float('inf'), True)
+
+        while time.time() - start_time < max_time:
+            if depth > max_depth:
+                break  # Empêcher une boucle infinie en limitant la profondeur
+            try:
+                _, current_best_action = self.alpha_beta_minimax(
+                    state, depth, float('-inf'), float('inf'), True
+                )
+                if current_best_action is not None:
+                    best_action = current_best_action
+            except Exception as e:
+                print(f"Erreur lors de la recherche à profondeur {depth}: {e}")
+                break  # Sortir de la boucle en cas de problème imprévu
+
+            depth += 1  # Augmenter la profondeur pour la prochaine itération
+
+        # Si aucune action n'a été trouvée, choisir une action aléatoire
+        if best_action is None:
+            possible_actions = state.get_possible_light_actions()
+            return random.choice(possible_actions)
 
         return best_action
 
