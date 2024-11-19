@@ -37,6 +37,27 @@ class GameStateDivercite(GameState):
             int: The current step of the game.
         """
         return self.step
+    
+    def to_key(self) -> str:
+        """
+        Convert the current game state into a unique key representation.
+
+        Returns:
+            str: A string representing the unique key of the current game state.
+        """
+        # Serialize the board's state and pieces left
+        board_state = ''.join(
+            f"{str(pos)}:{str(piece.get_type())}" for pos, piece in sorted(self.get_rep().get_env().items())
+        )
+    
+        players_pieces = '|'.join(
+            f"{str(player_id)}:{','.join(f'{str(piece)}:{count}' for piece, count in sorted(pieces.items()))}" 
+            for player_id, pieces in sorted(self.players_pieces_left.items())
+        )
+    
+        # Combine step, next player ID, and scores into the key
+        return f"{self.step}|{self.next_player.get_id()}|{','.join(map(str, self.scores.values()))}|{board_state}|{players_pieces}"
+
 
     def is_done(self) -> bool:
         """

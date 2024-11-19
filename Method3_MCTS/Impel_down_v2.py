@@ -14,7 +14,7 @@ class MyPlayer(PlayerDivercite):
         super().__init__(piece_type, name)
 
 # Je teste avec des valeurs plus faibles pour que ça baisse
-    def mcts(self, state: GameState, max_root_children=10, simulations=1500) -> Action:
+    def mcts(self, state: GameState, max_root_children=10, simulations=5000) -> Action:
         """ Perform MCTS using an improved implementation. """
         root = MCTS_Steph.TreeNode(state, max_root_children=max_root_children)
         
@@ -112,10 +112,10 @@ class MyPlayer(PlayerDivercite):
         if current_state.get_step() < 6:
             return self.mcts(current_state)
 
-        if current_state.get_step() > 20: 
-            depth = 6
-        else: 
+        if current_state.get_step() > 28: 
             depth = 4
+        else: 
+            depth = 6
         _, best_action = self.alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
         return best_action
 
