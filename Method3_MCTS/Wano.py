@@ -5,6 +5,7 @@ from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 from player_divercite import PlayerDivercite
 
+
 class MyPlayer(PlayerDivercite):
     """
     Player class for Divercite game that uses the Minimax algorithm with alpha-beta pruning.
@@ -47,7 +48,7 @@ class MyPlayer(PlayerDivercite):
         """
         Minimax algorithm with alpha-beta pruning, using a transposition table and action sorting.
         """
-        state_key = state.to_key()  # Suppose qu'une méthode `to_key()` existe pour générer une clé unique
+        state_key = self.generate_state_key(state)  # Génère une clé unique pour l'état
         if (state_key, depth) in self.transposition_table:
             return self.transposition_table[(state_key, depth)]
 
@@ -119,3 +120,15 @@ class MyPlayer(PlayerDivercite):
 
         # Pondération dynamique des cités et ressources en fonction de l'étape du jeu
         return player_score - opponent_score + (1 - 4 * state.step / 40) * nb_cite + (1 + 4 * state.step / 40) * nb_ressource
+
+    def generate_state_key(self, state: GameState) -> tuple:
+        """
+        Generate a unique key for the game state based on critical components.
+        """
+        # Utilisation des attributs essentiels pour construire une clé unique
+        board_repr = tuple(sorted((pos, piece.get_type()) for pos, piece in state.get_rep().get_env().items()))
+        player_pieces = tuple(
+            (player_id, tuple(sorted(pieces.items()))) for player_id, pieces in sorted(state.players_pieces_left.items())
+        )
+        scores = tuple(state.scores.values())
+        return (state.step, state.next_player.get_id(), scores, board_repr, player_pieces)
