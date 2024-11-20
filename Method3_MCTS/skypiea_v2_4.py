@@ -98,7 +98,7 @@ class MyPlayer(PlayerDivercite):
                 depth = 3
             elif nb_pieces_1 + nb_pieces_2 >= 26:
                 depth = 4
-            elif nb_pieces_1 + nb_pieces_2 >= 16:
+            elif nb_pieces_1 + nb_pieces_2 >= 14:
                 depth = 5
             else:
                 depth = 6

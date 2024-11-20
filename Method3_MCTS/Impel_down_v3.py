@@ -226,7 +226,7 @@ class MyPlayer(PlayerDivercite):
         if current_state.get_step() < 17:
 ### Attention j'ai modifié ta version ici 
             #return self.mcts_taylorsVersion(current_state, True, 10, 20000)
-            return self.mcts_taylorsVersion(current_state, True, 10, 7000)
+            return self.mcts_taylorsVersion(current_state, True, 10, 5000)
         # Pour les coups suivants, utiliser alpha-beta
         else:
             players = current_state.players
@@ -239,8 +239,8 @@ class MyPlayer(PlayerDivercite):
 
             # Ajuster la profondeur en fonction du nombre de pièces restantes
             if nb_pieces_1 + nb_pieces_2 >= 26:
-                depth = 5
-            elif nb_pieces_1 + nb_pieces_2 >= 12:
+                depth = 4
+            elif nb_pieces_1 + nb_pieces_2 >= 10:
                 depth = 6
             else:
                 depth = 7
