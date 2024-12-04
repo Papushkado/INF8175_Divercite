@@ -26,13 +26,13 @@ class MyPlayer(PlayerDivercite):
         total_pieces = sum(dic_player_pieces[p.get_id()][p_type] for p in players for p_type in pieces)
 
         if total_pieces >= 35:
-            return 3
+            return 2
         elif total_pieces >= 24:
             return 4
-        elif total_pieces >= 14:
+        elif total_pieces >= 16:
             return 5
         else:
-            return 6
+            return 7
 
     def alpha_beta_minimax(self, state: GameState, depth: int, alpha: float, beta: float, maximizing_player: bool):
         if depth == 0 or state.is_done():

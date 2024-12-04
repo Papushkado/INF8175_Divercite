@@ -81,18 +81,16 @@ class MyPlayer(PlayerDivercite):
             # Modifier la profondeur en fonction du nombre de pièces restantes
             
             # Fonctionne rapidement 
-            '''
             if nb_pieces_1 + nb_pieces_2 >= 35:
+                depth = 2
+            elif nb_pieces_1 + nb_pieces_2 >= 28:
                 depth = 3
-            elif nb_pieces_1 + nb_pieces_2 >= 12:
+            elif nb_pieces_1 + nb_pieces_2 >= 18:
                 depth = 4
+            elif nb_pieces_1 + nb_pieces_2 >= 18:
+                depth = 5
             else:
-                depth = 6
-            '''
-            if nb_pieces_1 + nb_pieces_2 >= 12:
-                depth = 4
-            else:
-                depth = 6
+                depth = 7
             
             _, best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
             return best_action
