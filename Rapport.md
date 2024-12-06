@@ -6,10 +6,11 @@ Equipe Challonge : **Orque des Tranchées** _Stephen Cohen - 2412336; Alicia Sha
 - [Introduction](#introduction)
 - [Cheminement](#cheminement)
 - [Notre agent : Skypiea\_v5](#notre-agent--skypiea_v5)
-    - [Choix du type d'algorithme](#choix-du-type-dalgorithme)
     - [Heuristique](#heuristique)
     - [Implémentation](#implémentation)
   - [Performances](#performances)
+    - [Performances de jeu](#performances-de-jeu)
+  - [Nombre d'états visités et profondeur dynamique](#nombre-détats-visités-et-profondeur-dynamique)
   - [Limites](#limites)
   - [Avantages](#avantages)
   - [Pistes d'améliorations](#pistes-daméliorations)
@@ -25,27 +26,39 @@ Equipe Challonge : **Orque des Tranchées** _Stephen Cohen - 2412336; Alicia Sha
 
 # Introduction 
 
-Dans ce rapport, nous allons présenter notre cheminement vers notre agent final dans le cadre du cours d'Intelligence Artificielle INF8175 centré cette année autour du jeu de société **Divercité**.
+Dans ce rapport, nous allons présenter le cheminement aboutissant à notre agent final pour le projet du cours Intelligence artificielle: méthodes et algorithmes, centré cette année sur le jeu de société Divercité.
 
 # Cheminement 
 
-Notre réflexion a d'abord débuté par l'implémentation de l'algorithme de Minimax, puis d'un Minimax alpha-bêta prunning et enfin de Monte Carlo Tree Search (MCTS). 
-Dans la suite, le code du _minimax_ et de l'_alpha-bêta prunning_ sont disponibles en annexe.  
-- **Minimax :** Cet implémentation est disponible sous les noms d'agents : `Water_seven` et `little_garden` sur Abyss. 
-Dans les deux cas, _la profondeur de recherche est fixée à 3_ pour **respecter la contrainte de temps imposée**. Avec ce paramètre, il reste environ 100 s à la fin de la partie. La différence réside dans l'heuristique choisie : 
-  - La première, celle de `little_garden` est la suivante : ```player_score - opponent_score```. On cherche à maximiser l'écart de points en notre faveur. Cependant on se rend vite compte que cette heuristique n'est pas assez précise; elle peut favoriser des divercités pour l'adversaire.
-  - La seconde, celle de `Water_seven`, tient compte de nos observations : nous avons remarqué que placer des cités en fin de partie est défavorable alors que les ressources permettent de finir des divercités ou de bloquer celles de l'adversaire. Ainsi nous avons cherché à pénaliser le choix de jouer une cité au fil de la partie, et de la favoriser le choix de ressources. Nous aboutissons à l'heuristique suivante : ```player_score - opponent_score + (1 - 2 * state.step/40) * nb_cite + (1 + 4 * state.step/40) * nb_ressource```.
-  **En plus de l'écart entre les points, nous rajoutons un paramètre qui tient compte de l'ensemble des coups disponibles (ressources ou cités).**
+Dans un premier temps, un algorithme _minimax_ a été mis en place,  un  _alpha-bêta pruning_ y a été ensuite ajouté. Enfin, la possibilité d'un Monte-Carlo Tree Search (MCTS) a été également explorée.
 
-- **Alpha-Beta prunning :** Cette implémentation est disponible dans les agents : `Enies_Lobby`, `skypiea_vX`. 
-L'avantage de l'alpha-Beta prunning réside dans l'élagage des états. Ce gain de temps est réinvesti au profit d'une recherche plus profonde. **Attention :** Nous avons remarqué qu'une grande profondeur avec une mauvaise heuristique propageait de mauvais résultats ce qui entrainent une dégradation significative des résultats de l'agent (notamment avec `skypiea` avec l'heuristique classique)
-    - **La profondeur est dynamique en fonction de l'avancée de la partie**. En effet, une _recherche profonde en début de partie représente un investissement de temps peu rentable pour un coup peu décisif_. C'est pour cela que le **premier coup est joué de manière aléatoire parmi le fait de poser une cité** ce qui permet de gagner 100 à 200s de jeu : 
-    ```
-    # Pré-choisir une action si on joue en premier
+Les codes Python du _minimax_ et de l'_alpha-bêta pruning_ sont disponibles en annexe.
+
+- **_Minimax_ :** Cette implémentation est disponible sous les noms d'agents : `Water_seven` et `little_garden` sur Abyss. 
+Dans les deux cas, _la profondeur de recherche est fixée à 3_ pour **respecter la contrainte de temps imposée**. Avec ce paramètre, il reste environ 100 s à la fin de la partie. La différence entre les deux agents réside dans l'heuristique choisie : 
+  - L'heuristique de `little_garden` est la suivante : ```player_score - opponent_score```. On cherche à maximiser l'écart de points en notre faveur. Cependant, cette heuristique n'est pas assez précise, elle peut favoriser des divercités pour l'adversaire.
+  - La seconde, celle de `Water_seven`, tient compte des observations faites lors de nos sessions de jeu. Placer des cités en fin de partie est défavorable, alors que les ressources permettent de finir des divercités ou de bloquer celles de l'adversaire. Ainsi, on pénalise le choix de jouer une cité au fil de la partie et on favorise le choix de ressources. Nous aboutissons à l'heuristique suivante : ```player_score - opponent_score + (1 - 2 * state.step/40) * nb_cite + (1 + 4 * state.step/40) * nb_ressource```.
+  **En plus de l'écart entre les points, nous rajoutons donc un paramètre qui tient compte de l'ensemble des coups disponibles (ressources ou cités).**
+
+- **_Alpha-bêta pruning_ :** Cette implémentation est disponible dans les agents : `Enies_Lobby` et `skypiea_vX`. 
+L'avantage de l'_alpha-bêta pruning_réside dans le gain de temps obtenu grâce à l'élagage. Ce temps supplémentaire est réinvesti au profit d'une recherche plus profonde. **Attention :** On remarque qu'une grande profondeur couplée à une mauvaise heuristique propage de mauvais résultats, ce qui entraine une dégradation significative des résultats de l'agent (notamment avec `skypiea` avec l'heuristique classique).
+    - **La profondeur est dynamique en fonction de l'avancée de la partie**. En effet, une _recherche profonde en début de partie représente un investissement de temps peu rentable pour un coup peu décisif_. Ainsi, le **premier coup est joué de manière aléatoire parmi les coups jouant des cités**, ce qui permet de gagner 100 à 200 s de jeu : 
+    <!-- ```
+        # Pré-choisir une action si on joue en premier
         if current_state.get_step() < 2:
             possible_actions = current_state.get_possible_light_actions()
             return random.choice(list(possible_actions))
+    ``` -->
     ```
+         # Pré-choisir une action si on joue en premier
+        if current_state.get_step() < 2:
+            possible_actions = current_state.get_possible_light_actions()
+        # Filtrer pour ne garder que les actions qui placent une cité (RC, GC, BC, YC)
+            city_actions = [action for action in possible_actions if action.data["piece"] in ['RC', 'GC', 'BC', 'YC']]
+            return random.choice(city_actions)
+
+    ```
+
     Puis, la profondeur est gérée comme suit afin de conserver environ 60 s en fin de partie :
 
     ```
@@ -58,7 +71,7 @@ L'avantage de l'alpha-Beta prunning réside dans l'élagage des états. Ce gain 
                 
             _, best_action = alpha_beta_minimax(current_state, depth, float('-inf'), float('inf'), True)
     ```
-Cette étape abouti à `skypiea_v2`, l'agent le plus performant de la génération alpha-beta pruning La profondeur est gérée de la manière suivante : 
+Cette étape d'ajustement de la profondeur abouti à `skypiea_v2`, l'agent le plus performant de la génération _alpha-bêta pruning_. La profondeur est gérée finalement de la manière suivante : 
 
 ```
 if nb_pieces_1 + nb_pieces_2 >= 12:
@@ -68,26 +81,28 @@ if nb_pieces_1 + nb_pieces_2 >= 12:
 ```
 et l'heuristique est celle-ci : ``` player_score - opponent_score + (1 - 2 * state.step/40) * nb_cite + (1 + 4 * state.step/40) * nb_ressource```
 
-- **MCTS :** Les résultats donnés par notre agent basé uniquement sur un MCTS ne sont pas assez satisfaisants pour mériter une présentation complète du code, il ne bat aucun des agents présentés plus haut. Cependant, nous souhaitions développer un agent combinant alpha-beta pruning et MCTS de la manière suivante: : 
-  - _Sur les 30% du début de jeu, jouer avec un MCTS pas forcément très efficient mais très rapide_ (avec un compromis tout de même pour ne pas subir une avance trop conséquente de l'adversaire)
-  - Puis un _Alpha-prunning de profondeur progressive de type  5 / 7_. 
+- **MCTS :** Les résultats donnés par notre agent basé uniquement sur un MCTS ne sont pas assez satisfaisants pour mériter une présentation complète du code, il ne bat aucun des agents présentés plus haut. Cependant, nous avons développé un agent combinant _alpha-bêta pruning_ et MCTS de la manière suivante: : 
+  - _Sur les 30% du début de jeu, jouer avec un MCTS moins optimal qu'un alpha-bêta pruning mais très rapide_. 
+  - Puis, un _alpha-bêta pruning de profondeur progressive de type  5 / 7_. 
 
-    Cependant, nous n'avons pas pu finaliser l'ajustement des paramètres avant le début du tournoi. Nos agents étaient soit **trop lents** (mais assez compétitifs, sans battre nos agents précédents) ou **trop peu efficaces** (mais rapides). Le code de notre agent qui réalise cela se trouve en [annexe](#code-impel-down) sous le nom d'`Impel Down`.
+L'idée première était d'obtenir rapidement des premiers coups, cohérents, voirs bons pour libérer du temps afin de réaliser une recherche plus profonde dans un deuxième temps. Dans le cas où le MCTS ne propose que des coups incohérents et mauvais, l'effet pourrait être compensé par la deuxième phase, qui engendrait déjà à ce stade des résultats probants.
 
-A ce stage, nous avons choisi parmi nos agents de perfectionner `skypiea_v2` (donc un algorithme de type minimax avec alpha-prunning pur)
+L'ajustement final des paramètres n'a pas pu être réalisé avant le début du tournoi. Nos agents étaient soit **trop lents** (mais assez compétitifs, sans battre nos agents précédents) ou **trop peu efficaces** (mais rapides). Le code de notre agent hybride est disponible en [annexe](#code-impel-down) sous le nom d'`Impel Down`.
+
+Nous avons donc choisi de perfectionner pour ce projet `skypiea_v2`, un agent _minimax alpha-bêta pruning_ pur.
 
 <div style="page-break-after: always;"></div>
 
 # Notre agent : Skypiea_v5
 
-### Choix du type d'algorithme 
+<!-- ### Choix du type d'algorithme 
 
-Notre agent est très proche de celui de type `skypiea`. C'est-à-dire, un Minimax Alpha-Beta prunning pur.
-Nous avons choisi ce type d'algorithme car il présentait les meilleurs résultats entre nos agents. 
+Notre agent est très proche de celui de type `skypiea`. C'est-à-dire, un _Minimax Alpha-bêta pruning_ pur.
+Nous avons choisi ce type d'algorithme car il présentait les meilleurs résultats entre nos agents.  -->
 
 ### Heuristique 
 
-Nous nous sommes concentrés sur l'heuristique décrite dans la partie Alpha-Beta Pruning, après avoir réalisé un benchmark pour les magiques numbers de pénalisation, nous obtenons l'heuristique suivante : ```player_score - opponent_score + (1 - 24 * state.step / 40) * nb_cite + (1 + 27 * state.step / 40) * nb_ressource ```
+La base de l'heuristique Skypiea_v5 est celle décrite dans la partie _Alpha-bêta Pruning_. Après avoir réalisé des tests pour affiner les coefficients de pénalisation, nous obtenons l'heuristique suivante : ```player_score - opponent_score + (1 - 24 * state.step / 40) * nb_cite + (1 + 27 * state.step / 40) * nb_ressource ```
 
 ### Implémentation 
 
@@ -95,46 +110,47 @@ Le code de notre agent est disponible [ici](#code-de-lagent-final--skypiea_v3)
 
 ## Performances
 
-Pour étudier les performances, nous allons étudier 
+### Performances de jeu
 
-- D'une part, les performances Abyss :
+Ces statistiques ont été obtenues à partir d'Abyss. On y présente tous les agents qui ont réalisé au moins un match.
 
-| Agents             | Notes                | Elo  | Total matches | Victoires | Défaites | W/L          | Nombre de diversités | NbDivercités/Game | Points marqués | Points concédés | Marqués/Concédés | Points marqués/Game | Points concédés/Game |
+| Agents             | Notes                | Elo  | Total matches | Victoires | Défaites | W/L          | Nombre de divercités | NbDivercités/Game | Points marqués | Points concédés | Points marqués/Concédés | Points marqués/Game | Points concédés/Game |
 |--------------------|----------------------|------|---------------|-----------|----------|--------------|---------------------|-------------------|----------------|-----------------|-----------------|--------------------|---------------------|
-| Skypiea v5         | Alpha Beta Pruning   | 1282 | 13            | 10        | 3        | 3,333333333  | 30                  | 2,307692308       | 259            | 201             | 1,288557214     | 19,92307692        | 15,46153846         |
-| Impel Down 25000   | MCTS puis AB         | 937  | 9             | 6         | 3        | 2            | 22                  | 2,444444444       | 200            | 147             | 1,360544218     | 22,22222222        | 16,33333333         |
+| Skypiea v5         | _Alpha-bêta pruning_   | 1282 | 13            | 10        | 3        | 3,333333333  | 30                  | 2,307692308       | 259            | 201             | 1,288557214     | 19,92307692        | 15,46153846         |
+| Impel Down 25000   | MCTS puis _Alpha-bêta pruning_         | 937  | 9             | 6         | 3        | 2            | 22                  | 2,444444444       | 200            | 147             | 1,360544218     | 22,22222222        | 16,33333333         |
 | Wano               |                      | 588  | 15            | 2         | 13       | 0,153846154  | 11                  | 0,7333333333      | 213            | 340             | 0,6264705882    | 14,2              | 22,66666667         |
-| Impel Down 15000   | MCTS puis AB         | 1006 | 1             | 1         | 0        | #DIV/0!      | 5                   | 5                 | 29             | 16              | 1,8125          | 29                 | 16                  |
+| Impel Down 15000   | MCTS puis _Alpha-bêta pruning_         | 1006 | 1             | 1         | 0        | #DIV/0!      | 5                   | 5                 | 29             | 16              | 1,8125          | 29                 | 16                  |
 | Water Seven        |                      | 971  | 1721          | 903       | 818      | 1,10391198   | 1972                | 1,145845439       | 29541          | 28239           | 1,046106449     | 17,16502034        | 16,40848344         |
 | Sabondy            |                      | 1108 | 226           | 142       | 84       | 1,69047619   | 291                 | 1,287610619       | 4224           | 3718            | 1,136094675     | 18,69026549        | 16,45132743         |
-| Skypiea v2.2       | Alpha Beta Pruning   | 1165 | 25            | 17        | 8        | 2,125        | 26                  | 1,04              | 447            | 386             | 1,158031088     | 17,88              | 15,44              |
-| Skypiea v2         | Alpha Beta Pruning   | 1275 | 489           | 350       | 139      | 2,517985612  | 636                 | 1,300613497       | 9085           | 7472            | 1,215872591     | 18,57873211        | 15,2801636          |
+| Skypiea v2.2       | _Alpha-bêta pruning_   | 1165 | 25            | 17        | 8        | 2,125        | 26                  | 1,04              | 447            | 386             | 1,158031088     | 17,88              | 15,44              |
+| Skypiea v2         | _Alpha-bêta pruning_   | 1275 | 489           | 350       | 139      | 2,517985612  | 636                 | 1,300613497       | 9085           | 7472            | 1,215872591     | 18,57873211        | 15,2801636          |
 | Little Garden      |                      | 713  | 707           | 337       | 370      | 0,910810811  | 488                 | 0,690240453       | 11860          | 11468           | 1,034182072     | 16,77510608        | 16,22065064         |
 | Skypia             |                      | 960  | 5             | 2         | 3        | 0,666666667  | 0                   | 0                 | 91             | 88              | 1,034090909     | 18,2               | 17,6               |
 
-**Remarques :** Tous les agents n'ont pas eu le même temps passé sur Abyss ce qui pourrait nous mener à des conclusions trop hâtives. Cela étant dit, nous retrouvons les performances lorsque nous faisons affronter nos agents en local entre eux. 
+**Remarques :** Le nombre de matches joués par un agent est assez inhomogène, les conclusions suivantes en prennent compte et sont à nuancer.
 
-Le tableau des performances met en évidence la compétitivité des différents agents dans l’environnement Abyss. Voici un commentaire détaillé des résultats :
+Le tableau met en évidence la compétitivité des différents agents dans l’environnement Abyss. Voici un commentaire détaillé des résultats :
 
-- Agent Skypiea_v5 (Alpha-Beta Pruning)
-    - Performance globale : Avec un Elo de 1282, l'agent Skypiea_v5 domine la majorité des parties, affichant un ratio victoires/défaites de 3,33.
-    - Diversités : Il obtient en moyenne 2,3 diversités par partie, témoignant d’une capacité à exploiter les ressources efficacement, bien que ce soit perfectible.
+- Agent Skypiea_v5 (_Alpha-bêta pruning_)
+    - Performance globale : Avec un Elo de 1282, l'agent Skypiea_v5 domine la majorité des parties, affichant un ratio victoires/défaites de 3,33 (pour seulement 13 matches cependant)
+    - Divercités : Il obtient en moyenne 2,3 diversités par partie, témoignant d’une capacité à exploiter les ressources efficacement, bien que cela soit perfectible.
     - Ratio points marqués/concédés : Le ratio de 1,29 montre une capacité à marquer plus de points que l’adversaire, reflet d’une bonne gestion des ressources et de l’heuristique employée.
 
-- Agent Impel Down (MCTS puis Alpha-Beta)
-    - Deux versions : Les versions avec 15 000 et 25 000 simulations affichent des performances variables. La version 25 000 obtient un Elo de 937, mais l’agent peine à être décisif (ratio W/L de 2).
-    - Diversités : Le score moyen de diversités par partie (2,44) est légèrement meilleur que Skypiea_v5, suggérant que l’exploration initiale en MCTS aide à diversifier les stratégies.
+- Agent Impel Down (MCTS puis _Alpha-bêta pruning_)
+    - Deux versions : Les versions avec 15 000 et 25 000 simulations aléatoires affichent des performances variables. La version 25 000 obtient un Elo de 937, mais l’agent peine à être décisif (ratio W/L de 2) et est davantage soumis au risque de _time out_. (Il est actuallement inactif pour cette même raison).
+    - Divercités : Le score moyen de divercités par partie (2,44) est légèrement meilleur que Skypiea_v5, suggérant que l’exploration initiale en MCTS réussit à choisir de meilleurs coups en début de partie que les agents de type Skypiea.
 
 - Agents intermédiaires (Skypiea_v2, Sabondy)
-    - Skypiea_v2 affiche des résultats stables avec un Elo de 1275 et un ratio W/L de 2,51. Cependant, son score en diversités (1,3/game) montre une faible exploitation des opportunités.
-    - Sabondy, bien qu’ayant un Elo de 1108, montre un ratio W/L impressionnant de 1,69, ce qui en fait un candidat robuste face à des adversaires variés.
+    - Ces deux agents sont de type _Alpha-bêta pruning_ purs montre des stables sur un grand nombre de matches, obtenant respectivement 1275 et 1108 d'Elo.
+    - Ces résultats confirment qu'un agent basé  _alpha-bêta pruning_ représente un base solide pour obtenir des résultats probants rapidement et facielement. Cela conforte le choix d'avoir poursuivi l'affinage des agents de type Skypiea.
 
+## Nombre d'états visités et profondeur dynamique
 
-- D'autre part, les performances entres nos agents au niveau du nombre d'états visités : 
+Ci-dessous, un graphique du nombres d'états évalués par Skypiea_v5 en fontion de l'avancée de la partie.
 
 ![alt text](graph_etats_visités.png)
 
-Sur le graphique des états visités, nous observons bien les différentes profondeurs de l'arbre du Minimax. De plus, notre stratégie qui vise à avoir un milieu de partie très profond est rendu possible grâce à un début de partie très peu profond. 
+Sur le graphique des états visités, nous observons bien les différentes profondeurs de l'arbre du _minimax_. De plus, notre stratégie qui vise à avoir un milieu de partie très profond est rendu possible grâce à un début de partie très peu profond. 
 Voici le nombre d'états visités au fil de la partie : ```[0, 452, 402, 43888, 34809, 34825, 21231, 18401, 337614, 299769, 143075, 137567, 1425242, 608967, 134754, 30259, 3387, 169, 25, 3]```
 
  - Le premier coup est aléatoire donc 0 
@@ -145,41 +161,41 @@ Voici le nombre d'états visités au fil de la partie : ```[0, 452, 402, 43888, 
 
 ## Limites 
 
-Notre agent présente de nombreuses limites, c'est pourquoi il n'a pas non plus bien performé dans challonge (outre des times out dès le coup 1 que nous ne comprenons pas). 
+Outre des _time out_ dès le coup 1 que nous ne comprenons pas, voici les pistes d'amélioration que nous avons identifiées : 
 
-Les raisons sont diverses mais voici celles que nous avons identifiées : 
-
-- **L'heuristique :** Notre heuristique ne tient pas compte de beaucoup d'aspect important du jeu, notamment **la présence de divercités**. En effet, nous ne savons à aucun moment combien de nos pièces ou des pièces adverses sont encore capables de réaliser une divercité ni si elles en sont éloignées. C'est pourquoi, nous pouvons juger une situation plus favorable alors qu'elle nous empêche de réaliser une divercité ou rapproche l'adversaire d'en faire une. C'est d'ailleurs ce que l'on peut observer dans l'étude des performances, nos agents réalisent en moyenne moins de 1,5 divercité par partie.
-- **La connaissance des pièces adverses :** Dans Divercité, nous avons connaissance des pièces adverses mais nous n'avons pas su comment l'exploiter. Alors que cela est possible, par exemple savoir que l'adversaire n'a plus de rouge nous permet de savoir qu'il ne pourra plus faire de divercité par exemple. S'il n'a plus de cité, nous savons que les places disponibles sont forcément pour nous donc nous n'aurions plus besoin de pénaliser et au contraire, construire des divercités autour de cases vides.
-- **Le temps de calcul :** Notre agent utilise presque l'intégralité du temps disponible (il reste 35 secondes à la fin). Hors au vu du résultat obtenu, nous pouvons encore l'améliorer. Nous allons en discuter dans les pistes d'amélioration. 
+- **L'heuristique :** Notre heuristique ne tient pas compte de **la présence de divercités** ou d'**opportunités de divercités** pour l'agent ou l'agent adverse. En effet, l'agent ne sait à aucun moment combien de ses pièces ou des pièces adverses sont encore capables de réaliser une divercité, ni si elles en sont éloignées. C'est pourquoi, nous pouvons juger une situation plus favorable alors qu'elle nous empêche de réaliser une divercité ou rapproche l'adversaire d'en faire une. C'est d'ailleurs ce que l'on peut observer dans l'étude des performances, nos agents réalisent en moyenne moins de 1,5 divercité par partie.
+- **La connaissance des pièces adverses :** Dans Divercité, les joueurs ont connaissance des pièces adverses. Par exemple, savoir que l'adversaire n'a plus de ressources rouges permet de savoir qu'il ne pourra plus faire de divercité. S'il n'a plus de cité, les places de cité disponibles nous reviennent. Il n'y aurait donc plus besoin de les pénaliser, il faudrait même construire des divercités autour des emplacements de cités vides.
+- **Le temps de calcul :** L'agent présenté utilise presque l'intégralité du temps disponible (il reste 35 secondes à la fin), sans pourtant présenter des résultats excellents. Cela suggère qu'il est possible d'élaguer davantage d'états, toujours dans l'optique d'augmenter la profondeur de recherche.
 
 ## Avantages 
 
-Certes, au vu des limites de notre agent, il est difficile d'y trouver des avantages, mais pas impossible : 
-
-- **L'implémentation :** L'algorithme du Minimax avec Alpha-Bêta prunning n'est pas compliqué à implémenter ce qui facilite le développement et permet d'avoir une phase de tests beaucoup plus longue qu'avec un algorithme plus copliqué à coder. 
-- **Les performances :** Les performances sont à ramener à la difficulté d'implémentation; si l'on compare à un MCTS par exemple, les résultats sont bien meilleurs. 
+- **L'implémentation :** L'algorithme _minimax_ avec _alpha-Bêta pruning_ n'est pas difficle à implémenter, ce qui facilite le développement et permet d'avoir une phase de tests beaucoup plus longue permettant d'ajuster l'heuristique par rapport à un algorithme plus complexe à mettre en place. 
+- **Les performances :** Le ratio entre la performance et la difficulté d'implémentation est excellent pour Skypiea_v5 et les autres agents de sa famille. A titre de comparaison, les agents hybrides avec un MCTS sont prometteurs mais nécessitent l'ajustement complexe de plusieurs autres paramètres (nombre de simulations totales, choix entre simulations aléatoires ou guidées par une heuristique, choix du moment de passage à l'_alpha-bêta pruning_) sans garantie d'amélioration substantive.
 
 
 ## Pistes d'améliorations  
 
-En ce qui concerne l'amélioration : 
-
-- **L'heuristique :** Nous pensions enrichir l’heuristique actuelle avec des facteurs comme le contrôle des zones stratégiques, la proximité de réalisation des diversités, et les blocages potentiels pour l’adversaire. Cela permet une prise de décisions plus stratégiques en fonction du context du jeu, surtout lors de phase plus critiques. 
+- **L'heuristique :** L’heuristique actuelle peut-être enrichie avec des facteurs comme le contrôle des zones stratégiques, la proximité de réalisation des divercités, et les blocages potentiels pour l’adversaire. Cela permet une prise de décisions plus stratégiques en fonction du contexte du jeu, surtout lors de phases plus critiques. 
 - **La réduction du temps de calcul :** 
-  - Pour cela nous pensions **stocker les évaluations d’états déjà visités** pour éviter de recalculer des scénarios redondants. L’utilisation d’une table de transposition permet d’accélérer les recherches, notamment dans les configurations de jeu symétriques. Pour se faire, nous pouvons utiliser des hashcodes d'états pour les identifier efficacement; tout en tenant compte aussi des symétries du plateau pour réduire de manière significative les recalculs. 
-  - Nous aurions également pu implémenter la politique de **_Late Move Reduction_** qui consiste à réduire la profondeur de recherche sur les coups explorés tardivement dans une branche, supposant que les premiers coups sont généralement les meilleurs. 
-  - Enfin, mieux **gérer le temps en fonction du contexte**. Dans cette optique, l'implémentation passe par une gestion adaptative du temps, permettant de limiter la profondeur ou d’interrompre des branches si le temps alloué pour un coup est proche de l’expiration.
+  - On pourrait **stocker les évaluations des états déjà visités** pour éviter de recalculer des scénarios redondants. L’utilisation d’une table de transposition permet d’accélérer les recherches, notamment dans les configurations de jeu symétriques. Pour se faire, on peut utiliser des hashcodes d'états pour les identifier efficacement; tout en tenant compte des symétries du plateau pour réduire de manière significative les répétitions de calcul. 
+  - Une stratégie de **_Late Move Reduction_** peut également être mise en place. Elle consiste à réduire la profondeur de recherche sur les coups explorés tardivement dans une branche, en supposant que les premiers coups sont généralement les meilleurs. 
+  - Une autre piste d'amélioration est de **gérer de temps de manière adaptive en fonction du temps restant**. Il s'agit de limiter la profondeur ou d’interrompre des branches si le temps alloué pour un coup est proche de l’expiration.
 - **Tenir compte de l'historique de nos parties :** Via une exploration bayésienne des actions, on pourrait ajuster la probabilité de sélection des actions en fonction de leur performance dans des simulations précédentes. 
 
 
 # Conclusion 
 
-Le développement et la mise en œuvre de l’agent `Skypiea_v5` ont illustré l’importance d’un équilibre entre la profondeur de recherche et l’efficacité des heuristiques dans des environnements complexes avec une limite de temps.
+Ainsi, notre équipe a développé un agent pour Divercité de type _alpha-bêta pruning_ plutôt performant, fruit d'un processus itératif formé par trois générations d'agents. 
 
-Nous avons démontré que l’alpha-bêta pruning est un choix pertinent lorsque la gestion du temps est primordiale. Cependant, le succès repose fortement sur l’adéquation de l’heuristique à la dynamique du jeu. L’introduction d’éléments de Monte Carlo Tree Search en début de partie, bien que prometteuse, nécessite des ajustements pour atteindre une performance optimale.
+L'heuristique employée met l'accent non seulement sur le score de la partie, mais prend également en compte des stratégies développées lors des sessions de jeu réelles en favorisant le coups impliquant des cités et en pénalisant les coups impliquant des ressources en _early game_. 
 
-Les performances obtenues dans Abyss, bien que satisfaisantes, laissent entrevoir des marges d’amélioration, notamment sur la gestion du temps et l’exploitation des diversités. Ces axes constituent des opportunités futures pour renforcer la compétitivité de l’agent. En enrichissant l’heuristique, en explorant des techniques hybrides et en optimisant les recherches grâce à des structures comme les tables de transposition, nous pourrions pousser cet agent au sommet des classements.
+L'heuristique et le type d'algorithme choisis ayant obtenu des résultats probants très tôt, le principal enjeu et défi de ce projet aura donc été d'augmenter la profondeur de recherche dans l'algorithme afin d'améliorer ces résultats, tout en tenant compte de la contrainte de temps. 
+
+Plusieurs approches ont été employées pour y répondre, dont une profondeur dynamique en fonction de l'avancée de la partie, pour favoriser la recherche d'états favorables en milieu de jeu, identifié comme le moment décisif d'une partie.
+
+L'idée d'un agent hybride MCTS-_alpha-bêta pruning_, qui apporte une réponse différente à ce problème, n'a pas été retenue. Elle demeure cependant une approche prometteuse mais plus complexe, nécessitant davantage d'investissment pour l'ajuster, l'affiner et l'améliorer.
+
+Finalement, à travers ce projet, nous avons mis en pratique plusieurs algorithmes de recherche adversarielle dans un cadre applicatif stimulant et ludique. Cette expérience mettant à profit nos capacités analytiques a nécessité la mise en place d'une réelle démarche de recherche collaborative, enrichissant ainsi notre bagage scientifique et nos compétences interpersonnelles.
 
 <div style="page-break-after: always;"></div>
 
