@@ -133,7 +133,7 @@ Le tableau met en évidence la compétitivité des différents agents dans l’e
 
 - Agent Skypiea_v5 (_Alpha-bêta pruning_)
     - Performance globale : Avec un Elo de 1282, l'agent Skypiea_v5 domine la majorité des parties, affichant un ratio victoires/défaites de 3,33 (pour seulement 13 matches cependant)
-    - Divercités : Il obtient en moyenne 2,3 diversités par partie, témoignant d’une capacité à exploiter les ressources efficacement, bien que cela soit perfectible.
+    - Divercités : Il obtient en moyenne 2,3 divercités par partie, témoignant d’une capacité à exploiter les ressources efficacement, bien que cela soit perfectible.
     - Ratio points marqués/concédés : Le ratio de 1,29 montre une capacité à marquer plus de points que l’adversaire, reflet d’une bonne gestion des ressources et de l’heuristique employée.
 
 - Agent Impel Down (MCTS puis _Alpha-bêta pruning_)
